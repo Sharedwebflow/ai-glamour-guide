@@ -2,8 +2,11 @@
 import { Heart, Sparkles, Zap, Star } from "lucide-react";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { StepCard } from "@/components/ui/step-card";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
       {/* Hero Section */}
@@ -18,7 +21,10 @@ const Index = () => {
           Get personalized skincare and makeup recommendations powered by
           advanced AI technology.
         </p>
-        <button className="animate-fade-up rounded-full bg-rose-500 px-8 py-3 text-white shadow-lg transition-all hover:bg-rose-600 hover:shadow-xl">
+        <button 
+          onClick={() => navigate('/quiz')}
+          className="animate-fade-up rounded-full bg-rose-500 px-8 py-3 text-white shadow-lg transition-all hover:bg-rose-600 hover:shadow-xl"
+        >
           Try AI Advisor Now
         </button>
       </section>
@@ -86,7 +92,10 @@ const Index = () => {
             Join thousands of satisfied users who have discovered their perfect beauty
             routine with our AI advisor.
           </p>
-          <button className="rounded-full bg-rose-500 px-8 py-3 text-white shadow-lg transition-all hover:bg-rose-600 hover:shadow-xl">
+          <button 
+            onClick={() => navigate('/quiz')}
+            className="rounded-full bg-rose-500 px-8 py-3 text-white shadow-lg transition-all hover:bg-rose-600 hover:shadow-xl"
+          >
             Get Started Free
           </button>
         </div>
