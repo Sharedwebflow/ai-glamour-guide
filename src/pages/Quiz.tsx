@@ -1,15 +1,48 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase"; // This will be used by your dev
 
 const Quiz = () => {
   const navigate = useNavigate();
-  const [code, setCode] = useState("# Write your Python code here\nprint('Hello, World!')");
-  const [output, setOutput] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [analysis, setAnalysis] = useState<string>("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleExecute = () => {
-    // Simulated execution - in reality, this would connect to a backend
-    setOutput("Hello, World!\n\nNote: This is a simulated output. To enable actual Python code execution, we'll need to integrate with a backend service.");
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!imageFile) return;
+    
+    setIsAnalyzing(true);
+    try {
+      // Your dev will implement the actual integration here
+      // Example of how they might implement it:
+      // 1. Upload image to Supabase storage
+      // const { data, error } = await supabase.storage
+      //   .from('facial-analysis')
+      //   .upload(`analysis/${Date.now()}-${imageFile.name}`, imageFile);
+      
+      // 2. Call the Python function (Edge Function)
+      // const { data: analysis } = await supabase.functions
+      //   .invoke('analyze-face', { body: { imageUrl: data.path } });
+      
+      // For now, we'll show a placeholder response
+      setAnalysis("Image analysis pending integration with Python backend...");
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      setAnalysis("Analysis failed. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (
@@ -24,37 +57,70 @@ const Quiz = () => {
         
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Python Code Executor
+            AI Beauty Analysis
           </h1>
 
-          {/* Code Editor */}
-          <div className="mb-4">
-            <div className="bg-gray-900 text-white p-4 rounded-t-lg flex justify-between items-center">
-              <span>main.py</span>
-              <button
-                onClick={handleExecute}
-                className="px-4 py-1 bg-rose-500 text-white rounded hover:bg-rose-600 transition-colors"
-              >
-                Run ►
-              </button>
+          {/* Image Upload */}
+          <div className="mb-8">
+            <div className="border-2 border-dashed border-rose-200 rounded-lg p-8 text-center">
+              {previewUrl ? (
+                <div className="space-y-4">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className="max-h-64 mx-auto rounded-lg"
+                  />
+                  <button
+                    onClick={() => {
+                      setImageFile(null);
+                      setPreviewUrl("");
+                    }}
+                    className="text-rose-500 hover:text-rose-600"
+                  >
+                    Remove Image
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <div className="text-gray-500">
+                      <p className="mb-2">Drop your image here or click to upload</p>
+                      <p className="text-sm">Supports JPG, PNG files</p>
+                    </div>
+                  </label>
+                </div>
+              )}
             </div>
-            <textarea
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full h-64 p-4 font-mono text-sm bg-gray-800 text-gray-100 rounded-b-lg focus:outline-none"
-              spellCheck="false"
-            />
           </div>
 
-          {/* Output Console */}
-          <div>
-            <div className="bg-gray-900 text-white p-2 rounded-t-lg">
-              Output
+          {/* Analysis Button */}
+          <button
+            onClick={handleAnalyze}
+            disabled={!imageFile || isAnalyzing}
+            className={`w-full py-3 rounded-lg text-white mb-8 ${
+              !imageFile || isAnalyzing
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-rose-500 hover:bg-rose-600'
+            }`}
+          >
+            {isAnalyzing ? 'Analyzing...' : 'Analyze Image'}
+          </button>
+
+          {/* Results Section */}
+          {analysis && (
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
+              <div className="prose max-w-none">
+                {analysis}
+              </div>
             </div>
-            <pre className="bg-gray-800 text-gray-100 p-4 rounded-b-lg font-mono text-sm min-h-[100px] whitespace-pre-wrap">
-              {output || 'Click "Run" to execute the code...'}
-            </pre>
-          </div>
+          )}
         </div>
       </div>
     </div>
