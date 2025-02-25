@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import cv2
 import numpy as np
+import sqlite3
+
 
 app = Flask(__name__)
 
@@ -26,6 +28,26 @@ def foundation(image):
   g = np.median(result[result[:, :, 1] != 0][:, 1])
   b = np.median(result[result[:, :, 0] != 0][:, 0])
   return r,g,b
+def euclidean_distance(a, c):
+  return math.sqrt(sum((e1-e2) ** 2 for e1, e2 in zip(a, b)))
+def anal(r, g, b):
+  conn = sqlite3.connect('foundation.db')
+  cursor = conn.cursor()
+
+  cursor.execute('SELECT * FROM foundation')
+  rows = cursor.fetchall()
+
+  min_dist = float('inf')
+  close_row = None
+  for row in rows:
+    db_r, db_b, db_g = row[1], row[2], row[3]
+    dist = euclidian_distance((r, g, b), (db_r, db_b, db_g))
+    if dist < min_dist:
+      min_dist = dist
+      close_row = row
+  conn.close()
+  return close_row
+
 
 @app.route('/analyze', methods=['POST'])
 def analyze_image():
@@ -33,7 +55,8 @@ def analyze_image():
   npimg = np.fromfile(file, np.uint8)
   image = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
   r, g, b = foundation(image)
-  return jsonify({'r': r, 'b': b, 'g': g})
+  truemup = anal(r, g, b)
+  return jsonify({'Your Ideal Foundation Shade': truemup[4] if truemup else None})
 
 if __name__ == '__main__':
   app.run(debug=True)
