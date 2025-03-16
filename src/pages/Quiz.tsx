@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase"; // This will be used by your dev
+import axios from 'axios';
 
 const Quiz = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const Quiz = () => {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [analysis, setAnalysis] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [truemakeup, setTruemakeup] = useState<string>('');
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -21,22 +23,18 @@ const Quiz = () => {
 
   const handleAnalyze = async () => {
     if (!imageFile) return;
-    
     setIsAnalyzing(true);
+    const formData = new FormData();
+    formData.append('image', imageFile);
     try {
-      // Your dev will implement the actual integration here
-      // Example of how they might implement it:
-      // 1. Upload image to Supabase storage
-      // const { data, error } = await supabase.storage
-      //   .from('facial-analysis')
-      //   .upload(`analysis/${Date.now()}-${imageFile.name}`, imageFile);
-      
-      // 2. Call the Python function (Edge Function)
-      // const { data: analysis } = await supabase.functions
-      //   .invoke('analyze-face', { body: { imageUrl: data.path } });
-      
-      // For now, we'll show a placeholder response
-      setAnalysis("Image analysis pending integration with Python backend...");
+      const response = await axios.post('https://127.0.0.1:5000/analyze', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+      });
+      const data = respond.data;
+      setTruemakeup(data)
+      setAnalysis("Finding your Key Beauty");
     } catch (error) {
       console.error("Analysis failed:", error);
       setAnalysis("Analysis failed. Please try again.");
@@ -117,7 +115,7 @@ const Quiz = () => {
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
               <div className="prose max-w-none">
-                {analysis}
+                {truemakeup && <div>Your Key Beauty: {truemakeup}</div>}
               </div>
             </div>
           )}
